@@ -1,5 +1,5 @@
-import {TasksActionsType, tasksReducer} from '../../features/TodolistList/bll/tasks-reducer';
-import {TodolistsActionsType, todolistsReducer} from '../../features/TodolistList/bll/todolists-reducer';
+import {TasksActionsType, tasksReducer} from '../../features/todos/bll/tasks-reducer';
+import {TodolistsActionsType, todolistsReducer} from '../../features/todos/bll/todolists-reducer';
 import {applyMiddleware, combineReducers, compose, createStore} from 'redux';
 import {AuthActionsType, authReducer} from "../../features/auth/bll/auth-reducer";
 import {TypedUseSelectorHook, useSelector} from "react-redux";
@@ -25,7 +25,7 @@ export const store = createStore(rootReducer, composeEnhancers(applyMiddleware(t
 
 // определить автоматически тип всего объекта состояния
 export type AppRootStateType = ReturnType<typeof rootReducer>
-type AppRootActionsType = TodolistsActionsType | TasksActionsType | AuthActionsType | AppActionsType
+export type AppRootActionsType = TodolistsActionsType | TasksActionsType | AuthActionsType | AppActionsType
 
 export const useAppDispatch = store.dispatch as ThunkDispatch<AppRootStateType, unknown, AppRootActionsType>
 export const useAppSelector: TypedUseSelectorHook<AppRootStateType> = useSelector

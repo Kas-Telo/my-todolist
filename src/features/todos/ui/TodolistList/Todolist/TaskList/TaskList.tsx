@@ -1,7 +1,9 @@
-import {TasksResponseType} from "../../../../api/tasks/tasks-api-types";
+import {TasksResponseType} from "../../../../../../api/tasks/tasks-api-types";
 import {Task} from "./Task/Task";
-import React from "react";
-import {FilterValuesType} from "../../bll/todolists-reducer";
+import React, {useEffect} from "react";
+import {FilterValuesType} from "../../../../bll/todolists-reducer";
+import {getTasks} from "../../../../bll/tasks-reducer";
+import {useAppDispatch, useAppSelector} from "../../../../../../app/bll/store";
 
 type TaskListPropsType = {
     id: string
@@ -12,14 +14,21 @@ type TaskListPropsType = {
     removeTask: (taskId: string, todolistId: string) => void
 }
 export const TaskList = (props: TaskListPropsType) => {
-    let tasksForTodolist = props.tasks.items
+    const dispatch = useAppDispatch
+    const isAuth = useAppSelector(state => state.auth.isAuth)
 
+    let tasksForTodolist = props.tasks.items
     if (props.filter === 'active') {
         tasksForTodolist = props.tasks.items.filter(t => !(!!t.status))
     }
     if (props.filter === 'completed') {
         tasksForTodolist = props.tasks.items.filter(t => !!t.status)
     }
+
+    useEffect(() => {
+        isAuth && dispatch(getTasks(props.id))
+    }, [isAuth])
+
     return (
         <>
             {

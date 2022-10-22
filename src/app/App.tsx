@@ -7,32 +7,34 @@ import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
 import {Menu} from '@mui/icons-material';
-import {getTodolists} from '../features/TodolistList/bll/todolists-reducer';
 import {useAppDispatch, useAppSelector} from './bll/store';
-import {getMe, login, logout} from "../features/auth/bll/auth-reducer";
-import {toggleIsInitialized} from "./bll/app-reducer";
-import {TodolistList} from "../features/TodolistList/TodolistList";
+import {logout} from "../features/auth/bll/auth-reducer";
+import {CircularProgress, LinearProgress} from "@mui/material";
+import {ErrorSnackbar} from "../components/ErrorSnackbar/ErrorSnackbar";
+import {Routing} from "./routing/Routing/Routing";
+import {initializeApp} from "./bll/app-reducer";
 
 function App() {
     const isAuth = useAppSelector(state => state.auth.isAuth)
-    const isInitializedApp = useAppSelector(state => state.app.isInitialized)
+    const status = useAppSelector(state => state.app.status)
+    const isInitialized = useAppSelector(state => state.app.isInitialized)
     const dispatch = useAppDispatch
 
-    const onClickButtonLoginHandler = () => {
-        !isAuth && dispatch(login({
-            email: 'alexkas2511@gmail.com',
-            password: 'Kas372api',
-            rememberMe: true,
-            captcha: false
-        }))
-        isAuth && dispatch(logout())
+    const logoutHandler = () => {
+        dispatch(logout())
     }
 
     useEffect(() => {
-        dispatch(getMe())
-        dispatch(getTodolists())
-        !isAuth && dispatch(toggleIsInitialized(false))
-    }, [isAuth])
+        dispatch(initializeApp())
+    }, [])
+
+    if (!isInitialized) {
+        return (
+            <div style={{display: 'flex', justifyContent: 'center', margin: '300px 0 0 0 '}}>
+                <CircularProgress/>
+            </div>
+        )
+    }
 
     return (
         <div className="App">
@@ -44,16 +46,16 @@ function App() {
                     <Typography variant="h6">
                         News
                     </Typography>
-                    <Button color="inherit" onClick={onClickButtonLoginHandler}>{isAuth ? 'Logout' : 'Login'}</Button>
+                    {isAuth && <Button color="inherit" onClick={logoutHandler}>Logout</Button>}
                 </Toolbar>
             </AppBar>
+            <div style={{position: 'fixed', width: '100%'}}>{status === 'progress' && <LinearProgress/>}</div>
             <Container fixed>
-                {isInitializedApp
-                    ? <TodolistList/>
-                    : 'Loading...'
-                }
+                <Routing/>
             </Container>
+            <ErrorSnackbar/>
         </div>
     );
 }
+
 export default App;

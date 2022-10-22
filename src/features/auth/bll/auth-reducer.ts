@@ -1,9 +1,11 @@
 import {authAPI} from "../../../api/auth/auth-api";
 import {AppThunk} from "../../../app/bll/store";
 import {LoginRequestType, UserResponseDataType} from "../../../api/auth/auth-api-types";
+import {setAppStatus} from "../../../app/bll/app-reducer";
+import {handleServerAppError, handleServerNetworkError} from "../../../assets/utils/error-util";
 
 const initialState = {
-    user: null as UserDomainType | null,
+    user: {} as UserDomainType,
     isAuth: false,
 }
 
@@ -24,33 +26,51 @@ export const toggleIsAuthAC = (isAuth: boolean) => ({type: 'TOGGLE_IS_AUTH', isA
 
 //TC's
 export const login = (loginData: LoginRequestType): AppThunk => dispatch => {
+    dispatch(setAppStatus('progress'))
     authAPI.login(loginData)
         .then(res => {
-            if (res.resultCode === 0) {
+            if (res.data.resultCode === 0) {
                 dispatch(toggleIsAuthAC(true))
+                dispatch(setAppStatus("success"))
             } else {
-                alert(res.messages[0])
+                handleServerAppError(res.data, dispatch)
             }
         })
-        .catch(e => alert(e))
+        .catch(e => {
+            handleServerNetworkError(e, dispatch)
+        })
+        .finally(() => dispatch(setAppStatus('idle')))
 }
 export const logout = (): AppThunk => dispatch => {
+    dispatch(setAppStatus('progress'))
     authAPI.logout()
-        .then(() => dispatch(toggleIsAuthAC(false)))
-        .catch(e => alert(e))
+        .then(() => {
+            dispatch(toggleIsAuthAC(false))
+            dispatch(setAppStatus("success"))
+        })
+        .catch(e => {
+            handleServerNetworkError(e, dispatch)
+        })
+        .finally(() => dispatch(setAppStatus('idle')))
 }
 export const getMe = (): AppThunk => dispatch => {
+    dispatch(setAppStatus('progress'))
     authAPI.getMe()
         .then(res => {
-            if (res.resultCode === 0) {
+            if (res.data.resultCode === 0) {
                 dispatch(toggleIsAuthAC(true))
-                res.data && dispatch(setUserDataAC(res.data))
-            }else{
+                dispatch(setUserDataAC(res.data.data))
+                dispatch(setAppStatus("success"))
+            } else {
                 dispatch(toggleIsAuthAC(false))
-                alert(res.messages[0])
+                handleServerAppError(res.data, dispatch)
             }
         })
-        .catch(e => alert(e))
+        .catch(e => {
+            dispatch(toggleIsAuthAC(false))
+            handleServerNetworkError(e, dispatch)
+        })
+        .finally(() => dispatch(setAppStatus('idle')))
 }
 
 //types

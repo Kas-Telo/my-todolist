@@ -1,21 +1,25 @@
-import React, {useCallback} from "react";
-import {useAppDispatch, useAppSelector} from "../../app/bll/store";
-import {createTask, deleteTask, updateTask} from "./bll/tasks-reducer";
+import React, {useCallback, useEffect} from "react";
+import {useAppDispatch, useAppSelector} from "../../../../app/bll/store";
+import {createTask, deleteTask, updateTask} from "../../bll/tasks-reducer";
 import {
     changeTodolistFilterAC,
     createTodolist,
     deleteTodolist,
     FilterValuesType,
+    getTodolists,
     updateTodolistTitle
-} from "./bll/todolists-reducer";
+} from "../../bll/todolists-reducer";
 import Grid from "@mui/material/Grid";
-import {AddItemForm} from "../../components/AddItemForm/AddItemForm";
+import {AddItemForm} from "../../../../components/AddItemForm/AddItemForm";
 import Paper from "@mui/material/Paper";
 import {Todolist} from "./Todolist/Todolist";
+import {useNavigate} from "react-router-dom";
 
 export const TodolistList: React.FC = () => {
     const todolists = useAppSelector(state => state.todolists)
     const tasks = useAppSelector(state => state.tasks)
+    const isAuth = useAppSelector(state => state.auth.isAuth)
+    const navigate = useNavigate()
     const dispatch = useAppDispatch
 
     const removeTask = useCallback(function (id: string, todolistId: string) {
@@ -49,6 +53,11 @@ export const TodolistList: React.FC = () => {
     const addTodolist = useCallback((title: string) => {
         dispatch(createTodolist(title))
     }, [dispatch]);
+
+    useEffect(() => {
+        isAuth && dispatch(getTodolists())
+        !isAuth && navigate('/login')
+    }, [isAuth])
     return (
         <>
             <Grid container style={{padding: '20px'}}>
@@ -62,14 +71,12 @@ export const TodolistList: React.FC = () => {
                         return <Grid item key={tl.id}>
                             <Paper style={{padding: '10px'}}>
                                 <Todolist
-                                    id={tl.id}
-                                    title={tl.title}
+                                    todolist={tl}
                                     tasks={allTodolistTasks}
                                     removeTask={removeTask}
                                     changeFilter={changeFilter}
                                     addTask={addTask}
                                     changeTaskStatus={changeStatus}
-                                    filter={tl.filter}
                                     removeTodolist={removeTodolist}
                                     changeTaskTitle={changeTaskTitle}
                                     changeTodolistTitle={changeTodolistTitle}

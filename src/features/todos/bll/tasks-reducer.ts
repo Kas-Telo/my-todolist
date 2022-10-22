@@ -2,6 +2,8 @@ import {AddTodolistActionType, RemoveTodolistActionType, SetAllTodolists} from '
 import {TaskResponseDataType, TasksResponseType, UpdateTaskRequestType} from "../../../api/tasks/tasks-api-types";
 import {AppThunk} from "../../../app/bll/store";
 import {tasksAPI} from "../../../api/tasks/tasks-api";
+import {setAppStatus} from "../../../app/bll/app-reducer";
+import {handleServerAppError, handleServerNetworkError} from "../../../assets/utils/error-util";
 
 const initialState = {} as {[key: string]: TasksResponseType}
 
@@ -78,24 +80,38 @@ export const setAllTasksAC = (todolistId: string, responseTasks: TasksResponseTy
 
 //TC's
 export const getTasks = (todolistId: string): AppThunk => dispatch => {
+    dispatch(setAppStatus("progress"))
     tasksAPI.getTasks(todolistId)
         .then(res => {
             dispatch(setAllTasksAC(todolistId, res.data))
+            dispatch(setAppStatus("success"))
         })
-        .catch(e => alert(e))
+        .catch(e => {
+            handleServerNetworkError(e, dispatch)
+        })
+        .finally(() => {
+            dispatch(setAppStatus('idle'))
+        })
 }
 export const createTask = (todolistId: string, title: string): AppThunk => dispatch => {
+    dispatch(setAppStatus("progress"))
     tasksAPI.createTask(todolistId, title)
         .then(res => {
+            console.log(res)
             if (res.data.resultCode === 0) {
-                res.data.data && dispatch(addTaskAC(todolistId, res.data.data.item))
+                dispatch(addTaskAC(todolistId, res.data.data.item))
+                dispatch(setAppStatus("success"))
             } else {
-                alert(res.data.messages[0])
+                handleServerAppError(res.data, dispatch)
             }
         })
-        .catch(e => alert(e))
+        .catch(e => {
+            handleServerNetworkError(e, dispatch)
+        })
+        .finally(() => dispatch(setAppStatus('idle')))
 }
 export const updateTask = (todolistId: string, taskId: string, updateData: UpdateTaskDomainModelType): AppThunk => (dispatch, getState) => {
+    dispatch(setAppStatus("progress"))
     const currentTask = getState().tasks[todolistId].items.find(el => el.id === taskId)
     if (currentTask) {
         let updateModel: UpdateTaskRequestType = {
@@ -110,26 +126,36 @@ export const updateTask = (todolistId: string, taskId: string, updateData: Updat
         tasksAPI.updateTask(todolistId, taskId, updateModel)
             .then(res => {
                 if (res.data.resultCode === 0) {
-                    res.data.data && dispatch(updateTaskAC(todolistId, taskId, res.data.data.item))
+                    dispatch(updateTaskAC(todolistId, taskId, res.data.data.item))
+                    dispatch(setAppStatus("success"))
                 } else {
-                    alert(res.data.messages[0])
+                    handleServerAppError(res.data, dispatch)
                 }
             })
-            .catch(e => alert(e))
+            .catch(e => {
+                handleServerNetworkError(e, dispatch)
+            })
+            .finally(() => dispatch(setAppStatus('idle')))
+
     }else{
-        console.error('task not found')
+        handleServerNetworkError('task not found', dispatch)
     }
 }
 export const deleteTask = (todolistId: string, taskId: string): AppThunk => dispatch => {
+    dispatch(setAppStatus("progress"))
     tasksAPI.deleteTask(todolistId, taskId)
         .then(res => {
             if (res.data.resultCode === 0) {
                 dispatch(removeTaskAC(todolistId, taskId))
+                dispatch(setAppStatus("success"))
             } else {
-                alert(res.data.messages[0])
+                handleServerAppError(res.data, dispatch)
             }
         })
-        .catch(e => alert(e))
+        .catch(e => {
+            handleServerNetworkError(e, dispatch)
+        })
+        .finally(() => dispatch(setAppStatus('idle')))
 }
 
 //types
@@ -150,5 +176,3 @@ export type TasksActionsType =
     | RemoveTodolistActionType
     | SetAllTodolists
     | ReturnType<typeof setAllTasksAC>
-
-
