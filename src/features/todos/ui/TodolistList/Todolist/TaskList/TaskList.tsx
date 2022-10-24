@@ -3,7 +3,8 @@ import {Task} from "./Task/Task";
 import React, {useEffect} from "react";
 import {FilterValuesType} from "../../../../bll/todolists-reducer";
 import {getTasks} from "../../../../bll/tasks-reducer";
-import {useAppDispatch, useAppSelector} from "../../../../../../app/bll/store";
+import {useAppDispatch} from "../../../../../../assets/hooks/useAppDispatch";
+import {useAppSelector} from "../../../../../../assets/hooks/useAppSelector";
 
 type TaskListPropsType = {
     id: string
@@ -14,7 +15,7 @@ type TaskListPropsType = {
     removeTask: (taskId: string, todolistId: string) => void
 }
 export const TaskList = (props: TaskListPropsType) => {
-    const dispatch = useAppDispatch
+    const dispatch = useAppDispatch()
     const isAuth = useAppSelector(state => state.auth.isAuth)
 
     let tasksForTodolist = props.tasks.items

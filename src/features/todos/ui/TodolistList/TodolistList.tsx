@@ -1,8 +1,7 @@
 import React, {useCallback, useEffect} from "react";
-import {useAppDispatch, useAppSelector} from "../../../../app/bll/store";
 import {createTask, deleteTask, updateTask} from "../../bll/tasks-reducer";
 import {
-    changeTodolistFilterAC,
+    changeTodolistFilter,
     createTodolist,
     deleteTodolist,
     FilterValuesType,
@@ -14,13 +13,15 @@ import {AddItemForm} from "../../../../components/AddItemForm/AddItemForm";
 import Paper from "@mui/material/Paper";
 import {Todolist} from "./Todolist/Todolist";
 import {useNavigate} from "react-router-dom";
+import {useAppDispatch} from "../../../../assets/hooks/useAppDispatch";
+import {useAppSelector} from "../../../../assets/hooks/useAppSelector";
 
 export const TodolistList: React.FC = () => {
     const todolists = useAppSelector(state => state.todolists)
     const tasks = useAppSelector(state => state.tasks)
     const isAuth = useAppSelector(state => state.auth.isAuth)
     const navigate = useNavigate()
-    const dispatch = useAppDispatch
+    const dispatch = useAppDispatch()
 
     const removeTask = useCallback(function (id: string, todolistId: string) {
         dispatch(deleteTask(todolistId, id));
@@ -39,7 +40,7 @@ export const TodolistList: React.FC = () => {
     }, []);
 
     const changeFilter = useCallback(function (value: FilterValuesType, todolistId: string) {
-        dispatch(changeTodolistFilterAC(todolistId, value));
+        dispatch(changeTodolistFilter({id: todolistId, filter: value}));
     }, []);
 
     const removeTodolist = useCallback(function (id: string) {

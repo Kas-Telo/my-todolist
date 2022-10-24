@@ -1,37 +1,39 @@
 import {authAPI} from "../../../api/auth/auth-api";
-import {AppThunk} from "../../../app/bll/store";
+import {AppDispatch} from "../../../app/bll/store";
 import {LoginRequestType, UserResponseDataType} from "../../../api/auth/auth-api-types";
 import {setAppStatus} from "../../../app/bll/app-reducer";
 import {handleServerAppError, handleServerNetworkError} from "../../../assets/utils/error-util";
+import {createSlice, PayloadAction} from "@reduxjs/toolkit";
 
 const initialState = {
-    user: {} as UserDomainType,
+    user: {} as UserResponseDataType,
     isAuth: false,
 }
 
-export const authReducer = (state: AuthStateType = initialState, action: AuthActionsType): AuthStateType => {
-    switch (action.type) {
-        case "SET_USER_DATA":
-            return {...state, user: action.user}
-        case "TOGGLE_IS_AUTH":
-            return {...state, isAuth: action.isAuth}
-        default:
-            return state
+const slice = createSlice({
+    name: 'auth',
+    initialState,
+    reducers: {
+        setUserData: (state, action: PayloadAction<{ user: UserResponseDataType }>) => {
+            state.user = action.payload.user
+        },
+        toggleIsAuth: (state, action: PayloadAction<{ isAuth: boolean }>) => {
+            state.isAuth = action.payload.isAuth
+        }
     }
-}
+})
 
-//AC's
-export const setUserDataAC = (user: UserResponseDataType) => ({type: 'SET_USER_DATA', user} as const)
-export const toggleIsAuthAC = (isAuth: boolean) => ({type: 'TOGGLE_IS_AUTH', isAuth} as const)
+export const authReducer = slice.reducer
+export const {setUserData, toggleIsAuth} = slice.actions
 
 //TC's
-export const login = (loginData: LoginRequestType): AppThunk => dispatch => {
-    dispatch(setAppStatus('progress'))
+export const login = (loginData: LoginRequestType) => (dispatch: AppDispatch) => {
+    dispatch(setAppStatus({status: 'progress'}))
     authAPI.login(loginData)
         .then(res => {
             if (res.data.resultCode === 0) {
-                dispatch(toggleIsAuthAC(true))
-                dispatch(setAppStatus("success"))
+                dispatch(toggleIsAuth({isAuth: true}))
+                dispatch(setAppStatus({status: "success"}))
             } else {
                 handleServerAppError(res.data, dispatch)
             }
@@ -39,49 +41,36 @@ export const login = (loginData: LoginRequestType): AppThunk => dispatch => {
         .catch(e => {
             handleServerNetworkError(e, dispatch)
         })
-        .finally(() => dispatch(setAppStatus('idle')))
+        .finally(() => dispatch(setAppStatus({status: 'idle'})))
 }
-export const logout = (): AppThunk => dispatch => {
-    dispatch(setAppStatus('progress'))
+export const logout = () => (dispatch: AppDispatch) => {
+    dispatch(setAppStatus({status: 'progress'}))
     authAPI.logout()
         .then(() => {
-            dispatch(toggleIsAuthAC(false))
-            dispatch(setAppStatus("success"))
+            dispatch(toggleIsAuth({isAuth: false}))
+            dispatch(setAppStatus({status: "success"}))
         })
         .catch(e => {
             handleServerNetworkError(e, dispatch)
         })
-        .finally(() => dispatch(setAppStatus('idle')))
+        .finally(() => dispatch(setAppStatus({status: 'idle'})))
 }
-export const getMe = (): AppThunk => dispatch => {
-    dispatch(setAppStatus('progress'))
+export const getMe = () => (dispatch: AppDispatch) => {
+    dispatch(setAppStatus({status: 'progress'}))
     authAPI.getMe()
         .then(res => {
             if (res.data.resultCode === 0) {
-                dispatch(toggleIsAuthAC(true))
-                dispatch(setUserDataAC(res.data.data))
-                dispatch(setAppStatus("success"))
+                dispatch(toggleIsAuth({isAuth: true}))
+                dispatch(setUserData({user: res.data.data}))
+                dispatch(setAppStatus({status: "success"}))
             } else {
-                dispatch(toggleIsAuthAC(false))
+                dispatch(toggleIsAuth({isAuth: false}))
                 handleServerAppError(res.data, dispatch)
             }
         })
         .catch(e => {
-            dispatch(toggleIsAuthAC(false))
+            dispatch(toggleIsAuth({isAuth: false}))
             handleServerNetworkError(e, dispatch)
         })
-        .finally(() => dispatch(setAppStatus('idle')))
+        .finally(() => dispatch(setAppStatus({status: 'idle'})))
 }
-
-//types
-type AuthStateType = typeof initialState
-export type AuthActionsType =
-    | ReturnType<typeof setUserDataAC>
-    | ReturnType<typeof toggleIsAuthAC>
-type UserDomainType = {
-    id: number
-    login: string
-    email: string
-}
-
-

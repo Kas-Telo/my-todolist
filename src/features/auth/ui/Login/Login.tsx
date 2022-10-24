@@ -1,12 +1,13 @@
 import {Button, Checkbox, FormControlLabel, FormGroup, FormLabel, Grid, TextField} from '@mui/material';
 import React, {useEffect} from 'react';
-import {useAppDispatch, useAppSelector} from "../../../../app/bll/store";
 import {useNavigate} from "react-router-dom";
 import {useFormik} from "formik";
 import {login} from "../../bll/auth-reducer";
+import {useAppDispatch} from "../../../../assets/hooks/useAppDispatch";
+import {useAppSelector} from "../../../../assets/hooks/useAppSelector";
 
 export const Login = () => {
-    const dispatch = useAppDispatch
+    const dispatch = useAppDispatch()
     const isAuth = useAppSelector(state => state.auth.isAuth)
     const navigate = useNavigate()
 

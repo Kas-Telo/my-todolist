@@ -7,18 +7,19 @@ import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
 import {Menu} from '@mui/icons-material';
-import {useAppDispatch, useAppSelector} from './bll/store';
 import {logout} from "../features/auth/bll/auth-reducer";
 import {CircularProgress, LinearProgress} from "@mui/material";
 import {ErrorSnackbar} from "../components/ErrorSnackbar/ErrorSnackbar";
 import {Routing} from "./routing/Routing/Routing";
 import {initializeApp} from "./bll/app-reducer";
+import {useAppDispatch} from "../assets/hooks/useAppDispatch";
+import {useAppSelector} from "../assets/hooks/useAppSelector";
 
 function App() {
     const isAuth = useAppSelector(state => state.auth.isAuth)
     const status = useAppSelector(state => state.app.status)
     const isInitialized = useAppSelector(state => state.app.isInitialized)
-    const dispatch = useAppDispatch
+    const dispatch = useAppDispatch()
 
     const logoutHandler = () => {
         dispatch(logout())

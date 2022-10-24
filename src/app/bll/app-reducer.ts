@@ -1,7 +1,8 @@
-import {AppThunk} from "./store";
+import {AppDispatch} from "./store";
 import {authAPI} from "../../api/auth/auth-api";
 import {handleServerAppError, handleServerNetworkError} from "../../assets/utils/error-util";
-import {toggleIsAuthAC} from "../../features/auth/bll/auth-reducer";
+import {toggleIsAuth} from "../../features/auth/bll/auth-reducer";
+import {createSlice, PayloadAction} from "@reduxjs/toolkit";
 
 const initialState = {
     isInitialized: false,
@@ -9,46 +10,40 @@ const initialState = {
     error: '',
 }
 
-export const appReducer = (state: AppStateType = initialState, action: AppActionsType): AppStateType => {
-    switch (action.type) {
-        case 'TOGGLE_IS_INITIALIZED':
-            return {...state, isInitialized: action.value}
-        case "SET_APP_STATUS":
-            return {...state, status: action.status}
-        case 'SET_APP_ERROR':
-            return {...state, error: action.error}
-        default:
-            return state
+const slice = createSlice({
+    name: 'app',
+    initialState,
+    reducers: {
+        toggleIsInitialized: (state, action: PayloadAction<{value: boolean}>) => {
+            state.isInitialized = action.payload.value
+        },
+        setAppStatus: (state, action: PayloadAction<{status: RequestStatusType}>) => {
+            state.status = action.payload.status
+        },
+        setAppError: (state, action:PayloadAction<{error: string}>) => {
+            state.error = action.payload.error
+        }
     }
-}
+})
 
-export const toggleIsInitialized = (value: boolean) =>
-    ({type: 'TOGGLE_IS_INITIALIZED', value} as const)
-export const setAppStatus = (status: RequestStatusType) =>
-    ({type: 'SET_APP_STATUS', status} as const)
-export const setAppError = (error: string) =>
-    ({type: 'SET_APP_ERROR', error} as const)
+export const appReducer = slice.reducer
+export const {toggleIsInitialized, setAppStatus, setAppError} = slice.actions
 
-export const initializeApp = (): AppThunk => dispatch => {
+export const initializeApp = () => (dispatch: AppDispatch) => {
     authAPI.getMe()
         .then(res => {
             if (res.data.resultCode === 0) {
-                dispatch(toggleIsAuthAC(true))
+                dispatch(toggleIsAuth({isAuth: true}))
             }else {
                 handleServerAppError(res.data, dispatch)
-                dispatch(toggleIsAuthAC(false))
+                dispatch(toggleIsAuth({isAuth: false}))
             }
         })
         .catch(e => {
             handleServerNetworkError(e, dispatch)
-            dispatch(toggleIsAuthAC(false))
+            dispatch(toggleIsAuth({isAuth: false}))
         })
-        .finally(() => dispatch(toggleIsInitialized(true)))
+        .finally(() => dispatch(toggleIsInitialized({value: true})))
 }
 
-export type AppStateType = typeof initialState
 export type RequestStatusType = 'idle' | 'progress' | 'success' | 'failed'
-export type AppActionsType =
-    | ReturnType<typeof toggleIsInitialized>
-    | ReturnType<typeof setAppStatus>
-    | ReturnType<typeof setAppError>

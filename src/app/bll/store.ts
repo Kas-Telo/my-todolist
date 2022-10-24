@@ -1,36 +1,27 @@
-import {TasksActionsType, tasksReducer} from '../../features/todos/bll/tasks-reducer';
-import {TodolistsActionsType, todolistsReducer} from '../../features/todos/bll/todolists-reducer';
-import {applyMiddleware, combineReducers, compose, createStore} from 'redux';
-import {AuthActionsType, authReducer} from "../../features/auth/bll/auth-reducer";
-import {TypedUseSelectorHook, useSelector} from "react-redux";
-import thunk, {ThunkAction, ThunkDispatch} from 'redux-thunk';
-import {AppActionsType, appReducer} from "./app-reducer";
+import {tasksReducer} from '../../features/todos/bll/tasks-reducer';
+import {todolistsReducer} from '../../features/todos/bll/todolists-reducer';
+import {combineReducers} from 'redux';
+import {authReducer} from "../../features/auth/bll/auth-reducer";
+import thunk from 'redux-thunk';
+import {appReducer} from "./app-reducer";
+import {configureStore} from "@reduxjs/toolkit";
 
-// объединяя reducer-ы с помощью combineReducers,
-// мы задаём структуру нашего единственного объекта-состояния
 const rootReducer = combineReducers({
     app: appReducer,
     tasks: tasksReducer,
     todolists: todolistsReducer,
     auth: authReducer,
 })
-// непосредственно создаём store
-declare global {
-    interface Window {
-        __REDUX_DEVTOOLS_EXTENSION_COMPOSE__?: typeof compose;
-    }
-}
-const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
-export const store = createStore(rootReducer, composeEnhancers(applyMiddleware(thunk)));
 
-// определить автоматически тип всего объекта состояния
-export type AppRootStateType = ReturnType<typeof rootReducer>
-export type AppRootActionsType = TodolistsActionsType | TasksActionsType | AuthActionsType | AppActionsType
+export const store = configureStore({
+    reducer: rootReducer,
+    middleware: getDefaultMiddleware => getDefaultMiddleware().prepend(thunk)
+} )
 
-export const useAppDispatch = store.dispatch as ThunkDispatch<AppRootStateType, unknown, AppRootActionsType>
-export const useAppSelector: TypedUseSelectorHook<AppRootStateType> = useSelector
 
-export type AppThunk<ReturnType = void> = ThunkAction<ReturnType, AppRootStateType, unknown, AppRootActionsType>
+export type RootState = ReturnType<typeof store.getState>
+export type AppDispatch = typeof store.dispatch
+
 
 // а это, чтобы можно было в консоли браузера обращаться к store в любой момент
 // @ts-ignore
