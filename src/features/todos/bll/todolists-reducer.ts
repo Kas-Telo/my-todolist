@@ -4,6 +4,7 @@ import {todolistsAPI} from "../../../api/todolists/todolists-api";
 import {RequestStatusType, setAppStatus} from "../../../app/bll/app-reducer";
 import {handleServerAppError, handleServerNetworkError} from "../../../assets/utils/error-util";
 import {createSlice, PayloadAction} from "@reduxjs/toolkit";
+import {getTasks} from "./tasks-thunks";
 
 const initialState = [] as Array<TodolistDomainType>
 
@@ -33,6 +34,9 @@ const slice = createSlice({
         setAllTodolists: (state, action: PayloadAction<{ todolists: Array<TodolistResponseDataType> }>) => {
             return action.payload.todolists.map(el => ({...el, filter: 'all', entityStatus: 'idle'}))
         },
+        clearData: (state, action) => {
+            return []
+        }
     }
 })
 
@@ -43,7 +47,8 @@ export const {
     changeTodolistTitle,
     changeTodolistFilter,
     setTodolistEntityStatus,
-    setAllTodolists
+    setAllTodolists,
+    clearData
 } = slice.actions
 
 //TC's
@@ -52,6 +57,9 @@ export const getTodolists = () => (dispatch: AppDispatch) => {
     todolistsAPI.getTodolists()
         .then(res => {
             dispatch(setAllTodolists({todolists: res.data}))
+            res.data.forEach(el => {
+                dispatch(getTasks(el.id))
+            })
             dispatch(setAppStatus({status: "success"}))
         })
         .catch(e => {

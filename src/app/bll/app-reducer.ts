@@ -1,8 +1,6 @@
 import {AppDispatch} from "./store";
-import {authAPI} from "../../api/auth/auth-api";
-import {handleServerAppError, handleServerNetworkError} from "../../assets/utils/error-util";
-import {toggleIsAuth} from "../../features/auth/bll/auth-reducer";
-import {createSlice, PayloadAction} from "@reduxjs/toolkit";
+import {getMe} from "../../features/auth/bll/auth-reducer";
+import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
 
 const initialState = {
     isInitialized: false,
@@ -10,40 +8,50 @@ const initialState = {
     error: '',
 }
 
+export const initializeApp = createAsyncThunk<any, any, { dispatch: AppDispatch }>(
+    'app/initializeApp',
+    ({}, {dispatch,rejectWithValue}) => {
+
+        const promise = Promise.resolve(dispatch(getMe()))
+        promise
+            .then(res => {
+                debugger
+                console.log(promise)
+                console.log(res)
+                return {}
+            })
+            .catch(res => {
+                debugger
+                console.log(res)
+                return rejectWithValue({err: 'err'})
+            })
+    })
+
+
 const slice = createSlice({
     name: 'app',
     initialState,
     reducers: {
-        toggleIsInitialized: (state, action: PayloadAction<{value: boolean}>) => {
-            state.isInitialized = action.payload.value
-        },
-        setAppStatus: (state, action: PayloadAction<{status: RequestStatusType}>) => {
+        setAppStatus: (state, action: PayloadAction<{ status: RequestStatusType }>) => {
             state.status = action.payload.status
         },
-        setAppError: (state, action:PayloadAction<{error: string}>) => {
+        setAppError: (state, action: PayloadAction<{ error: string }>) => {
             state.error = action.payload.error
         }
+    },
+    extraReducers: builder => {
+        builder.addCase(initializeApp.fulfilled, (state, action) => {
+            debugger
+            state.isInitialized = true
+        })
+        builder.addCase(initializeApp.rejected, (state, action) => {
+            state.isInitialized = true
+        })
     }
 })
 
 export const appReducer = slice.reducer
-export const {toggleIsInitialized, setAppStatus, setAppError} = slice.actions
+export const {setAppStatus, setAppError} = slice.actions
 
-export const initializeApp = () => (dispatch: AppDispatch) => {
-    authAPI.getMe()
-        .then(res => {
-            if (res.data.resultCode === 0) {
-                dispatch(toggleIsAuth({isAuth: true}))
-            }else {
-                handleServerAppError(res.data, dispatch)
-                dispatch(toggleIsAuth({isAuth: false}))
-            }
-        })
-        .catch(e => {
-            handleServerNetworkError(e, dispatch)
-            dispatch(toggleIsAuth({isAuth: false}))
-        })
-        .finally(() => dispatch(toggleIsInitialized({value: true})))
-}
 
 export type RequestStatusType = 'idle' | 'progress' | 'success' | 'failed'

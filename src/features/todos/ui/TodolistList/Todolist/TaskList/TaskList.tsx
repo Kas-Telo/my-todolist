@@ -1,10 +1,7 @@
 import {TasksResponseType} from "../../../../../../api/tasks/tasks-api-types";
 import {Task} from "./Task/Task";
-import React, {useEffect} from "react";
+import React from "react";
 import {FilterValuesType} from "../../../../bll/todolists-reducer";
-import {getTasks} from "../../../../bll/tasks-reducer";
-import {useAppDispatch} from "../../../../../../assets/hooks/useAppDispatch";
-import {useAppSelector} from "../../../../../../assets/hooks/useAppSelector";
 
 type TaskListPropsType = {
     id: string
@@ -15,9 +12,6 @@ type TaskListPropsType = {
     removeTask: (taskId: string, todolistId: string) => void
 }
 export const TaskList = (props: TaskListPropsType) => {
-    const dispatch = useAppDispatch()
-    const isAuth = useAppSelector(state => state.auth.isAuth)
-
     let tasksForTodolist = props.tasks.items
     if (props.filter === 'active') {
         tasksForTodolist = props.tasks.items.filter(t => !(!!t.status))
@@ -25,10 +19,6 @@ export const TaskList = (props: TaskListPropsType) => {
     if (props.filter === 'completed') {
         tasksForTodolist = props.tasks.items.filter(t => !!t.status)
     }
-
-    useEffect(() => {
-        isAuth && dispatch(getTasks(props.id))
-    }, [isAuth])
 
     return (
         <>

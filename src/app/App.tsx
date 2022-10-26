@@ -26,7 +26,8 @@ function App() {
     }
 
     useEffect(() => {
-        dispatch(initializeApp())
+        // dispatch(getMe())
+        dispatch(initializeApp({}))
     }, [])
 
     if (!isInitialized) {

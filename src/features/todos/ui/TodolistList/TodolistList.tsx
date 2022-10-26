@@ -1,5 +1,4 @@
 import React, {useCallback, useEffect} from "react";
-import {createTask, deleteTask, updateTask} from "../../bll/tasks-reducer";
 import {
     changeTodolistFilter,
     createTodolist,
@@ -15,6 +14,7 @@ import {Todolist} from "./Todolist/Todolist";
 import {useNavigate} from "react-router-dom";
 import {useAppDispatch} from "../../../../assets/hooks/useAppDispatch";
 import {useAppSelector} from "../../../../assets/hooks/useAppSelector";
+import {createTask, deleteTask, updateTask} from "../../bll/tasks-thunks";
 
 export const TodolistList: React.FC = () => {
     const todolists = useAppSelector(state => state.todolists)
@@ -23,20 +23,20 @@ export const TodolistList: React.FC = () => {
     const navigate = useNavigate()
     const dispatch = useAppDispatch()
 
-    const removeTask = useCallback(function (id: string, todolistId: string) {
-        dispatch(deleteTask(todolistId, id));
+    const removeTask = useCallback(function (taskId: string, todolistId: string) {
+        dispatch(deleteTask({todolistId, taskId}));
     }, []);
 
     const addTask = useCallback(function (title: string, todolistId: string) {
-        dispatch(createTask(todolistId, title));
+        dispatch(createTask({todolistId, title}));
     }, []);
 
-    const changeStatus = useCallback(function (id: string, isDone: boolean, todolistId: string) {
-        dispatch(updateTask(todolistId, id, {status: isDone ? 1 : 0}));
+    const changeStatus = useCallback(function (taskId: string, isDone: boolean, todolistId: string) {
+        dispatch(updateTask({todolistId, taskId, data: {status: isDone ? 1 : 0}}));
     }, []);
 
-    const changeTaskTitle = useCallback(function (id: string, newTitle: string, todolistId: string) {
-        dispatch(updateTask(todolistId, id, {title: newTitle}));
+    const changeTaskTitle = useCallback(function (taskId: string, newTitle: string, todolistId: string) {
+        dispatch(updateTask({todolistId, taskId, data: {title: newTitle}}));
     }, []);
 
     const changeFilter = useCallback(function (value: FilterValuesType, todolistId: string) {
