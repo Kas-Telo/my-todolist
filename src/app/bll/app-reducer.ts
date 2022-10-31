@@ -1,6 +1,6 @@
 import {AppDispatch} from "./store";
-import {getMe} from "../../features/auth/bll/auth-reducer";
 import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
+import {getMe} from "../../features/auth/bll/auth-thunks";
 
 const initialState = {
     isInitialized: false,
@@ -10,21 +10,10 @@ const initialState = {
 
 export const initializeApp = createAsyncThunk<any, any, { dispatch: AppDispatch }>(
     'app/initializeApp',
-    ({}, {dispatch,rejectWithValue}) => {
-
-        const promise = Promise.resolve(dispatch(getMe()))
-        promise
-            .then(res => {
-                debugger
-                console.log(promise)
-                console.log(res)
-                return {}
-            })
-            .catch(res => {
-                debugger
-                console.log(res)
-                return rejectWithValue({err: 'err'})
-            })
+    async (param, {dispatch}) => {
+        await dispatch(getMe())
+        dispatch(setAppError({error: ''}))
+        return {}
     })
 
 
@@ -40,11 +29,7 @@ const slice = createSlice({
         }
     },
     extraReducers: builder => {
-        builder.addCase(initializeApp.fulfilled, (state, action) => {
-            debugger
-            state.isInitialized = true
-        })
-        builder.addCase(initializeApp.rejected, (state, action) => {
+        builder.addCase(initializeApp.fulfilled, (state) => {
             state.isInitialized = true
         })
     }

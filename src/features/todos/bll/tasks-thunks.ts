@@ -10,33 +10,37 @@ export const getTasks = createAsyncThunk(
     'tasks/getTasks',
     async (todolistId: string, thunkAPI) => {
         thunkAPI.dispatch(setAppStatus({status: "progress"}))
-        const res = await tasksAPI.getTasks(todolistId)
         try {
+            const res = await tasksAPI.getTasks(todolistId)
             thunkAPI.dispatch(setAppStatus({status: "success"}))
+            return {todolistId: todolistId, responseTasks: res.data}
         } catch (e) {
             handleServerNetworkError(e, thunkAPI.dispatch)
+            return thunkAPI.rejectWithValue(null)
         } finally {
             thunkAPI.dispatch(setAppStatus({status: 'idle'}))
         }
-        return {todolistId: todolistId, responseTasks: res.data}
+
     })
 export const createTask = createAsyncThunk(
     'tasks/createTask',
     async (param: { todolistId: string, title: string }, thunkAPI) => {
         thunkAPI.dispatch(setAppStatus({status: "progress"}))
-        const res = await tasksAPI.createTask(param.todolistId, param.title)
         try {
+            const res = await tasksAPI.createTask(param.todolistId, param.title)
             if (res.data.resultCode === 0) {
                 thunkAPI.dispatch(setAppStatus({status: "success"}))
+                return {task: res.data.data.item}
             } else {
                 handleServerAppError(res.data, thunkAPI.dispatch)
+                return thunkAPI.rejectWithValue(null)
             }
         } catch (e) {
             handleServerNetworkError(e, thunkAPI.dispatch)
+            return thunkAPI.rejectWithValue(null)
         } finally {
             thunkAPI.dispatch(setAppStatus({status: 'idle'}))
         }
-        return {task: res.data.data.item}
     })
 export const updateTask = createAsyncThunk<UpdateTaskThunkType<TaskResponseDataType>,
     UpdateTaskThunkType<UpdateTaskDomainModelType>,
@@ -58,8 +62,8 @@ export const updateTask = createAsyncThunk<UpdateTaskThunkType<TaskResponseDataT
             deadline: currentTask.deadline,
             ...param.data
         }
-        const res = await tasksAPI.updateTask(param.todolistId, param.taskId, updateModel)
         try {
+            const res = await tasksAPI.updateTask(param.todolistId, param.taskId, updateModel)
             if (res.data.resultCode === 0) {
                 thunkAPI.dispatch(setAppStatus({status: "success"}))
                 return {todolistId: param.todolistId, taskId: param.taskId, data: res.data.data.item}
@@ -77,22 +81,23 @@ export const updateTask = createAsyncThunk<UpdateTaskThunkType<TaskResponseDataT
 export const deleteTask = createAsyncThunk(
     'tasks/deleteTask',
     async (param: { todolistId: string, taskId: string }, thunkAPI) => {
-    thunkAPI.dispatch(setAppStatus({status: "progress"}))
-    const res = await tasksAPI.deleteTask(param.todolistId, param.taskId)
-    try {
-        if (res.data.resultCode === 0) {
-            // thunkAPI.dispatch(removeTaskAC({todolistId: todolistId, taskId: taskId}))
-            thunkAPI.dispatch(setAppStatus({status: "success"}))
-        } else {
-            handleServerAppError(res.data, thunkAPI.dispatch)
+        thunkAPI.dispatch(setAppStatus({status: "progress"}))
+        try {
+            const res = await tasksAPI.deleteTask(param.todolistId, param.taskId)
+            if (res.data.resultCode === 0) {
+                thunkAPI.dispatch(setAppStatus({status: "success"}))
+                return {todolistId: param.todolistId, taskId: param.taskId}
+            } else {
+                handleServerAppError(res.data, thunkAPI.dispatch)
+                return thunkAPI.rejectWithValue(null)
+            }
+        } catch (e) {
+            handleServerNetworkError(e, thunkAPI.dispatch)
+            return thunkAPI.rejectWithValue(null)
+        } finally {
+            thunkAPI.dispatch(setAppStatus({status: 'idle'}))
         }
-    } catch (e) {
-        handleServerNetworkError(e, thunkAPI.dispatch)
-    } finally {
-        thunkAPI.dispatch(setAppStatus({status: 'idle'}))
-    }
-    return {todolistId: param.todolistId, taskId: param.taskId}
-})
+    })
 
 //types
 export type UpdateTaskDomainModelType = {

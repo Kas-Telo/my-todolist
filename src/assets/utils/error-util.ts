@@ -2,6 +2,7 @@ import axios, {AxiosError} from "axios";
 import {setAppError, setAppStatus} from "../../app/bll/app-reducer";
 import {ServerResponseType} from "../../api/api-types";
 import {Dispatch} from "redux";
+import {toggleIsAuth} from "../../features/auth/bll/auth-reducer";
 
 
 export const handleServerNetworkError = (e: unknown, dispatch: Dispatch) => {
@@ -9,8 +10,11 @@ export const handleServerNetworkError = (e: unknown, dispatch: Dispatch) => {
     if (axios.isAxiosError(err)) {
         const error = err.response?.data ? err.response?.data.message : err.message
         dispatch(setAppError({error}))
+        if (err.response?.status === 401) {
+            dispatch(toggleIsAuth({isAuth: false}))
+        }
         console.warn(error)
-    }else {
+    } else {
         dispatch(setAppError({error: err.message}))
     }
     dispatch((setAppStatus({status: 'failed'})))

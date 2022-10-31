@@ -2,9 +2,9 @@ import {Button, Checkbox, FormControlLabel, FormGroup, FormLabel, Grid, TextFiel
 import React, {useEffect} from 'react';
 import {useNavigate} from "react-router-dom";
 import {useFormik} from "formik";
-import {login} from "../../bll/auth-reducer";
 import {useAppDispatch} from "../../../../assets/hooks/useAppDispatch";
 import {useAppSelector} from "../../../../assets/hooks/useAppSelector";
+import {login} from "../../bll/auth-thunks";
 
 export const Login = () => {
     const dispatch = useAppDispatch()

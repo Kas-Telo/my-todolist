@@ -4,26 +4,27 @@ import {Delete} from '@mui/icons-material';
 import IconButton from '@mui/material/IconButton';
 import Checkbox from '@mui/material/Checkbox';
 import {TaskResponseDataType} from "../../../../../../../api/tasks/tasks-api-types";
+import {deleteTask, updateTask} from "../../../../../bll/tasks-thunks";
+import {useAppDispatch} from "../../../../../../../assets/hooks/useAppDispatch";
 
 type TaskPropsType = {
     task: TaskResponseDataType
     todolistId: string
-    changeTaskStatus: (id: string, isDone: boolean, todolistId: string) => void
-    changeTaskTitle: (taskId: string, newTitle: string, todolistId: string) => void
-    removeTask: (taskId: string, todolistId: string) => void
 }
 export const Task = React.memo((props: TaskPropsType) => {
+    const dispatch = useAppDispatch()
     const onClickHandler = useCallback(() => {
-        props.removeTask(props.task.id, props.todolistId)
+        dispatch(deleteTask({todolistId: props.todolistId, taskId: props.task.id}));
     }, [props.task.id, props.todolistId]);
 
     const onChangeHandler = useCallback((e: ChangeEvent<HTMLInputElement>) => {
-        let newIsDoneValue = e.currentTarget.checked
-        props.changeTaskStatus(props.task.id, newIsDoneValue, props.todolistId)
+        dispatch(updateTask({todolistId: props.todolistId,
+            taskId: props.task.id,
+            data: {status: e.currentTarget.checked ? 1 : 0}}));
     }, [props.task.id, props.todolistId]);
 
     const onTitleChangeHandler = useCallback((newValue: string) => {
-        props.changeTaskTitle(props.task.id, newValue, props.todolistId)
+        dispatch(updateTask({todolistId: props.todolistId, taskId: props.task.id, data: {title: newValue}}));
     }, [props.task.id, props.todolistId]);
 
     return <div key={props.task.id} className={!!props.task.status ? 'is-done' : ''}>

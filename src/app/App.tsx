@@ -7,13 +7,13 @@ import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
 import {Menu} from '@mui/icons-material';
-import {logout} from "../features/auth/bll/auth-reducer";
 import {CircularProgress, LinearProgress} from "@mui/material";
 import {ErrorSnackbar} from "../components/ErrorSnackbar/ErrorSnackbar";
 import {Routing} from "./routing/Routing/Routing";
 import {initializeApp} from "./bll/app-reducer";
 import {useAppDispatch} from "../assets/hooks/useAppDispatch";
 import {useAppSelector} from "../assets/hooks/useAppSelector";
+import {logout} from "../features/auth/bll/auth-thunks";
 
 function App() {
     const isAuth = useAppSelector(state => state.auth.isAuth)
@@ -26,7 +26,6 @@ function App() {
     }
 
     useEffect(() => {
-        // dispatch(getMe())
         dispatch(initializeApp({}))
     }, [])
 

@@ -1,18 +1,20 @@
-import {addTodolist, clearData, removeTodolist, setAllTodolists,} from './todolists-reducer';
 import {TasksResponseType} from "../../../api/tasks/tasks-api-types";
 import {createSlice} from "@reduxjs/toolkit";
 import {createTask, deleteTask, getTasks, updateTask} from "./tasks-thunks";
+import {createTodolist, deleteTodolist, getTodolists} from "./todolists-thunks";
+import {logout} from "../../auth/bll/auth-thunks";
 
 const initialState = {} as { [key: string]: TasksResponseType }
 
 const slice = createSlice({
     name: 'tasks',
     initialState,
-    reducers: {
-
-    },
+    reducers: {},
     extraReducers: (builder) => {
-        builder.addCase(setAllTodolists, (state, action) => {
+        builder.addCase(logout.fulfilled , state => {
+            return initialState
+        })
+        builder.addCase(getTodolists.fulfilled, (state, action) => {
             action.payload.todolists.forEach(el => {
                     state[el.id] = {
                         items: [],
@@ -22,10 +24,10 @@ const slice = createSlice({
                 }
             )
         });
-        builder.addCase(addTodolist, (state, action) => {
+        builder.addCase(createTodolist.fulfilled, (state, action) => {
             state[action.payload.todolist.id] = {items: [], totalCount: 0, error: null}
         });
-        builder.addCase(removeTodolist, (state, action) => {
+        builder.addCase(deleteTodolist.fulfilled, (state, action) => {
             delete state[action.payload.todolistId]
         });
         builder.addCase(getTasks.fulfilled, (state, action) => {
@@ -44,9 +46,6 @@ const slice = createSlice({
             const index = state[action.payload.todolistId].items.findIndex(el => el.id === action.payload.taskId)
             state[action.payload.todolistId].items[index] = action.payload.data
         });
-        builder.addCase(clearData, (state, action) => {
-            return {}
-        })
     }
 })
 
