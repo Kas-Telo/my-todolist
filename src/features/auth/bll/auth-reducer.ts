@@ -7,7 +7,7 @@ const initialState = {
     isAuth: false,
 }
 
-const slice = createSlice({
+export const slice = createSlice({
     name: 'auth',
     initialState,
     reducers: {
@@ -23,7 +23,7 @@ const slice = createSlice({
     }
 })
 
-export const authReducer = slice.reducer
+// export const authReducer = slice.reducer
 export const {toggleIsAuth} = slice.actions
 
 //TC's

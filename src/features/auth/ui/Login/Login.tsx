@@ -2,14 +2,14 @@ import {Button, Checkbox, FormControlLabel, FormGroup, FormLabel, Grid, TextFiel
 import React, {useEffect} from 'react';
 import {useNavigate} from "react-router-dom";
 import {useFormik} from "formik";
-import {useAppDispatch} from "../../../../assets/hooks/useAppDispatch";
 import {useAppSelector} from "../../../../assets/hooks/useAppSelector";
-import {login} from "../../bll/auth-thunks";
+import {authActions, selectIsAuth} from "../../index";
+import {useActions} from "../../../../assets/hooks/useActions";
 
 export const Login = () => {
-    const dispatch = useAppDispatch()
-    const isAuth = useAppSelector(state => state.auth.isAuth)
+    const isAuth = useAppSelector(selectIsAuth)
     const navigate = useNavigate()
+    const {login} = useActions(authActions)
 
     useEffect(() => {
         isAuth && navigate('/')
@@ -22,7 +22,7 @@ export const Login = () => {
             rememberMe: false
         },
         onSubmit: values => {
-            dispatch(login({email: values.email, password: values.password, rememberMe: values.rememberMe}))
+            login({email: values.email, password: values.password, rememberMe: values.rememberMe})
         }
     })
     return (
