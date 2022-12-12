@@ -26,7 +26,7 @@ export const AddItemForm = React.memo(function (props: AddItemFormPropsType) {
     }
 
     const onKeyPressHandler = (e: KeyboardEvent<HTMLInputElement>) => {
-        if (error !== null) {
+        if (error !== null && title.length <= 100 && e.key !== 'Enter') {
             setError(null);
         }
         if (e.key === 'Enter') {
@@ -43,6 +43,7 @@ export const AddItemForm = React.memo(function (props: AddItemFormPropsType) {
                    label="Title"
                    helperText={error}
                    disabled={props.disabled}
+                   multiline
         />
         <IconButton color="primary" onClick={addItem} disabled={props.disabled}>
             <AddBox/>

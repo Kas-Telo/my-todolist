@@ -1,30 +1,61 @@
 import {Button, Checkbox, FormControlLabel, FormGroup, FormLabel, Grid, TextField} from '@mui/material';
 import React, {useEffect} from 'react';
 import {useNavigate} from "react-router-dom";
-import {useFormik} from "formik";
+import {FormikHelpers, useFormik} from "formik";
 import {useAppSelector} from "../../../../assets/hooks/useAppSelector";
-import {authActions, selectIsAuth} from "../../index";
-import {useActions} from "../../../../assets/hooks/useActions";
+import {authActions, authSelectors} from "../../index";
+import {useAppDispatch} from "../../../../assets/hooks/useAppDispatch";
+
+type FormValuesType = {
+    email: string
+    password: string
+    rememberMe: boolean
+}
+type FormikErrorType = {
+    email?: string
+    password?: string
+    rememberMe?: boolean
+}
+
 
 export const Login = () => {
-    const isAuth = useAppSelector(selectIsAuth)
+    const isAuth = useAppSelector(authSelectors.selectIsAuth)
     const navigate = useNavigate()
-    const {login} = useActions(authActions)
+    const dispatch = useAppDispatch()
 
     useEffect(() => {
         isAuth && navigate('/')
     }, [isAuth])
 
+
     const formik = useFormik({
+        validate: values => {
+            const errors: FormikErrorType = {}
+            if (!values.email) {
+                errors.email = 'Email is required'
+            }
+            if (!values.password) {
+                errors.password = 'Password is required'
+            }
+            return errors
+        },
         initialValues: {
             email: '',
             password: '',
             rememberMe: false
         },
-        onSubmit: values => {
-            login({email: values.email, password: values.password, rememberMe: values.rememberMe})
+        onSubmit: async (values: FormValuesType, formikHelpers: FormikHelpers<FormValuesType>) => {
+            const action = await dispatch(authActions.login(values))
+
+            if (authActions.login.rejected.match(action)) {
+                if (action.payload?.fieldsErrors?.length) {
+                    const error = action.payload.fieldsErrors[0]
+                    formikHelpers.setFieldError('email', error.error)
+                }
+            }
         }
     })
+
     return (
         <Grid container justifyContent={"center"}>
             <Grid item xs={4} justifyContent={'center'}>
@@ -44,9 +75,10 @@ export const Login = () => {
                             margin={"dense"}
                             label="Email"
                             variant="standard"
-                            type={'email'}
                             {...formik.getFieldProps('email')}
                         />
+                        {formik.errors.email && formik.touched.email &&
+                            <span style={{color: 'red', fontSize: '12px'}}>{formik.errors.email}</span>}
                         <TextField
                             label="Password"
                             variant="standard"
@@ -54,6 +86,8 @@ export const Login = () => {
                             margin={"dense"}
                             {...formik.getFieldProps('password')}
                         />
+                        {formik.errors.password && formik.touched.password &&
+                            <span style={{color: 'red', fontSize: '12px'}}>{formik.errors.password}</span>}
                         <FormControlLabel
                             control={<Checkbox/>}
                             label={'Remember me'}

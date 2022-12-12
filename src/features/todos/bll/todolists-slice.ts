@@ -1,13 +1,12 @@
 import {TodolistResponseDataType} from "../../../api/todolists/todolists-api-types";
-import {RequestStatusType} from "../../../app/bll/app-reducer";
 import {createSlice, PayloadAction} from "@reduxjs/toolkit";
 import {createTodolist, deleteTodolist, getTodolists, updateTodolistTitle} from "./todolists-thunks";
 import {logout} from "../../auth/bll/auth-thunks";
+import {RequestStatusType} from "../../../app/types";
 
 const initialState = [] as Array<TodolistDomainType>
 
-
-const slice = createSlice({
+export const slice = createSlice({
     name: 'todolists',
     initialState,
     reducers: {
@@ -28,7 +27,7 @@ const slice = createSlice({
             state.unshift({...action.payload.todolist, filter: 'all', entityStatus: 'idle'})
         })
         builder.addCase(getTodolists.fulfilled, (state, action) => {
-            return action.payload.todolists.map(el => ({...el, filter: 'all', entityStatus: 'idle'}))
+            return action.payload.todolists.map((el: TodolistResponseDataType) => ({...el, filter: 'all', entityStatus: 'idle'}))
         })
         builder.addCase(deleteTodolist.fulfilled, (state, action) => {
             const index = state.findIndex(el => el.id === action.payload.todolistId)
@@ -41,7 +40,6 @@ const slice = createSlice({
     }
 })
 
-export const todolistsReducer = slice.reducer
 export const {
     changeTodolistFilter,
     setTodolistEntityStatus,

@@ -1,8 +1,6 @@
-import {slice} from './bll/auth-reducer'
+import {slice} from './bll/auth-slice'
 import {asyncActions} from './bll/auth-thunks'
-import { selectIsAuth } from './bll/selectors'
-import {Login} from './ui/Login/Login'
-
+import * as authSelectors from './bll/selectors'
 
 const authReducer = slice.reducer
 const authActions = {
@@ -12,6 +10,5 @@ const authActions = {
 export {
     authReducer,
     authActions,
-    Login,
-    selectIsAuth,
+    authSelectors,
 }

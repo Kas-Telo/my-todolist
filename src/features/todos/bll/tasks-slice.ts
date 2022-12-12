@@ -3,10 +3,11 @@ import {createSlice} from "@reduxjs/toolkit";
 import {createTask, deleteTask, getTasks, updateTask} from "./tasks-thunks";
 import {createTodolist, deleteTodolist, getTodolists} from "./todolists-thunks";
 import {logout} from "../../auth/bll/auth-thunks";
+import {TodolistResponseDataType} from "../../../api/todolists/todolists-api-types";
 
 const initialState = {} as { [key: string]: TasksResponseType }
 
-const slice = createSlice({
+export const slice = createSlice({
     name: 'tasks',
     initialState,
     reducers: {},
@@ -15,7 +16,7 @@ const slice = createSlice({
             return initialState
         })
         builder.addCase(getTodolists.fulfilled, (state, action) => {
-            action.payload.todolists.forEach(el => {
+            action.payload.todolists.forEach((el: TodolistResponseDataType) => {
                     state[el.id] = {
                         items: [],
                         totalCount: 0,
@@ -49,5 +50,4 @@ const slice = createSlice({
     }
 })
 
-export const tasksReducer = slice.reducer
 

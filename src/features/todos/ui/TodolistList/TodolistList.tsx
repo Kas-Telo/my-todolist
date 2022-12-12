@@ -1,26 +1,27 @@
 import React, {useCallback, useEffect} from "react";
 import Grid from "@mui/material/Grid";
 import {AddItemForm} from "../../../../components/AddItemForm/AddItemForm";
-import Paper from "@mui/material/Paper";
 import {Todolist} from "./Todolist/Todolist";
 import {useNavigate} from "react-router-dom";
-import {useAppDispatch} from "../../../../assets/hooks/useAppDispatch";
 import {useAppSelector} from "../../../../assets/hooks/useAppSelector";
-import {createTodolist, getTodolists} from "../../bll/todolists-thunks";
+import {todosActions, todosSelectors} from "../../index";
+import {authSelectors} from "../../../auth/";
+import {useActions} from "../../../../assets/hooks/useActions";
 
 export const TodolistList: React.FC = () => {
-    const todolists = useAppSelector(state => state.todolists)
-    const isAuth = useAppSelector(state => state.auth.isAuth)
+    const todolists = useAppSelector(todosSelectors.selectTodos)
+    const isAuth = useAppSelector(authSelectors.selectIsAuth)
+
+    const {createTodolist, getTodolists} = useActions(todosActions)
 
     const navigate = useNavigate()
-    const dispatch = useAppDispatch()
 
     const addTodolist = useCallback((title: string) => {
-        dispatch(createTodolist({title}))
-    }, [dispatch]);
+        createTodolist({title})
+    }, []);
 
     useEffect(() => {
-        isAuth && dispatch(getTodolists())
+        isAuth && getTodolists({})
         !isAuth && navigate('/login')
     }, [isAuth])
     return (
@@ -28,16 +29,15 @@ export const TodolistList: React.FC = () => {
             <Grid container style={{padding: '20px'}}>
                 <AddItemForm addItem={addTodolist}/>
             </Grid>
-            <Grid container spacing={3}>
-                {
-                    todolists.map(tl => {
-                        return <Grid item key={tl.id}>
-                            <Paper style={{padding: '10px'}}>
+            <Grid container spacing={5} style={{flexWrap: 'nowrap', overflowX: 'scroll', minHeight: '500px'}}>
+                {todolists.map(tl => {
+                    return (
+                        <Grid item key={tl.id}>
+                            <div style={{width: '300px'}}>
                                 <Todolist todolist={tl}/>
-                            </Paper>
-                        </Grid>
-                    })
-                }
+                            </div>
+                        </Grid>)
+                })}
             </Grid>
 
         </>

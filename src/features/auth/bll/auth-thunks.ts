@@ -1,18 +1,16 @@
 import {createAsyncThunk} from "@reduxjs/toolkit";
-import {setAppStatus} from "../../../app/bll/app-reducer";
 import {authAPI} from "../../../api/auth/auth-api";
-import {
-    handleAsyncServerAppError, handleAsyncServerNetworkError,
-    handleServerAppError,
-    handleServerNetworkError
-} from "../../../assets/utils/error-util";
+import {handleAsyncServerAppError, handleAsyncServerNetworkError,} from "../../../assets/utils/error-util";
 import {LoginRequestType} from "../../../api/auth/auth-api-types";
-import {toggleIsAuth} from "./auth-reducer";
-import {AppDispatch} from "../../../app/bll/store";
+import {toggleIsAuth} from "./auth-slice";
+import {appSyncActions} from "../../../app/bll/app-sync-actions";
+import {ThunkAPIType} from "../../../app/types";
 
-export const getMe = createAsyncThunk(
+const {setAppStatus} = appSyncActions
+
+export const getMe = createAsyncThunk<any, any, ThunkAPIType>(
     'app/getMe',
-    async (param, thunkAPI) => {
+    async (param = {}, thunkAPI) => {
         thunkAPI.dispatch(setAppStatus({status: 'progress'}))
         try {
             const res = await authAPI.getMe()
@@ -20,12 +18,10 @@ export const getMe = createAsyncThunk(
                 thunkAPI.dispatch(setAppStatus({status: "success"}))
                 return {user: res.data.data}
             } else {
-                handleServerAppError(res.data, thunkAPI.dispatch)
-                return thunkAPI.rejectWithValue(null)
+                return handleAsyncServerAppError(res.data, thunkAPI)
             }
         } catch (e) {
-            handleServerNetworkError(e, thunkAPI.dispatch)
-            return thunkAPI.rejectWithValue(null)
+            return handleAsyncServerNetworkError(e, thunkAPI)
         } finally {
             thunkAPI.dispatch(setAppStatus({status: 'idle'}))
         }
@@ -37,19 +33,19 @@ export const login = createAsyncThunk<any, any, ThunkAPIType>(
         try {
             const res = await authAPI.login(loginData)
             if (res.data.resultCode === 0) {
-                thunkAPI.dispatch(getMe())
+                thunkAPI.dispatch(getMe({}))
                 thunkAPI.dispatch(setAppStatus({status: "success"}))
                 return {}
             } else {
-                handleAsyncServerAppError(res.data, thunkAPI)
+                return handleAsyncServerAppError(res.data, thunkAPI, false)
             }
         } catch (e) {
-            handleAsyncServerNetworkError(e, thunkAPI)
+            return handleAsyncServerNetworkError(e, thunkAPI)
         } finally {
             thunkAPI.dispatch(setAppStatus({status: 'idle'}))
         }
     })
-export const logout = createAsyncThunk(
+export const logout = createAsyncThunk<any, any, ThunkAPIType>(
     'app/logout',
     async (param, thunkAPI) => {
         thunkAPI.dispatch(setAppStatus({status: 'progress'}))
@@ -59,8 +55,7 @@ export const logout = createAsyncThunk(
             thunkAPI.dispatch(setAppStatus({status: "success"}))
             return {}
         } catch (e) {
-            handleServerNetworkError(e, thunkAPI.dispatch)
-            return thunkAPI.rejectWithValue(null)
+            return handleAsyncServerNetworkError(e, thunkAPI)
         } finally {
             thunkAPI.dispatch(setAppStatus({status: 'idle'}))
         }
@@ -72,8 +67,3 @@ export const asyncActions = {
     getMe
 }
 
-//types
-export type ThunkAPIType = {
-    dispatch: AppDispatch,
-    rejectWithValue: Function
-}

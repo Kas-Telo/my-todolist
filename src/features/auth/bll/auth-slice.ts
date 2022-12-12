@@ -23,9 +23,7 @@ export const slice = createSlice({
     }
 })
 
-// export const authReducer = slice.reducer
 export const {toggleIsAuth} = slice.actions
 
-//TC's
 
 

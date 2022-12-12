@@ -1,59 +1,32 @@
 import axios, {AxiosError} from "axios";
-import {setAppError, setAppStatus} from "../../app/bll/app-reducer";
 import {ServerResponseType} from "../../api/api-types";
-import {Dispatch} from "redux";
-import {toggleIsAuth} from "../../features/auth/bll/auth-reducer";
-import {ThunkAPIType} from "../../features/auth/bll/auth-thunks";
+import {appSyncActions} from "../../app/bll/app-sync-actions";
+import {AppDispatch} from "../../app/types";
 
+const {setAppStatus, setAppError} = appSyncActions
 
-export const handleServerNetworkError = (e: unknown, dispatch: Dispatch) => {
-    const err = e as Error | AxiosError
-    if (axios.isAxiosError(err)) {
-        const error = err.response?.data ? err.response?.data.message : err.message
-        dispatch(setAppError({error}))
-        if (err.response?.status === 401) {
-            dispatch(toggleIsAuth({isAuth: false}))
-        }
-        console.warn(error)
-    } else {
-        dispatch(setAppError({error: err.message}))
-    }
-    dispatch((setAppStatus({status: 'failed'})))
+//types
+type ThunkAPIType = {
+    dispatch: AppDispatch
+    rejectWithValue: Function
 }
-
-export const handleServerAppError = (res: ServerResponseType, dispatch: Dispatch) => {
-    if (res.messages.length > 0) {
-        dispatch(setAppError({error: res.messages[0]}))
-    } else {
-        dispatch(setAppError({error: 'some error occurred'}))
-    }
-    dispatch((setAppStatus({status: 'failed'})))
-}
-
-export const handleAsyncServerNetworkError = (e: unknown, thunkAPI: ThunkAPIType) => {
+export const handleAsyncServerNetworkError = (e: unknown, thunkAPI: ThunkAPIType, showError = true) => {
     const err = e as Error | AxiosError
-    if (axios.isAxiosError(err)) {
-        const error = err.response?.data ? err.response?.data.message : err.message
-        thunkAPI.dispatch(setAppError({error}))
-        if (err.response?.status === 401) {
-            thunkAPI.dispatch(toggleIsAuth({isAuth: false}))
-        }
-        console.warn(error)
-    } else {
-        thunkAPI.dispatch(setAppError({error: err.message}))
+    if (showError) {
+        thunkAPI.dispatch(setAppError(axios.isAxiosError(err)
+            ? {error: err.response?.data ? err.response?.data.message : err.message}
+            : {error: err.message ? err.message : 'Some error occurred'}))
     }
     thunkAPI.dispatch((setAppStatus({status: 'failed'})))
-    return thunkAPI.rejectWithValue(err)
+    return thunkAPI.rejectWithValue({errors: [err.message], fieldsErrors: undefined})
 }
 
-export const handleAsyncServerAppError = (res: ServerResponseType, thunkAPI: ThunkAPIType) => {
-    let err = {error: 'some error occurred'}
-    if (res.messages.length > 0) {
-        err = {error: res.messages[0]}
-        thunkAPI.dispatch(setAppError(err))
-    } else {
-        thunkAPI.dispatch(setAppError(err))
+export const handleAsyncServerAppError = (res: ServerResponseType, thunkAPI: ThunkAPIType, showError = true) => {
+    if (showError) {
+        thunkAPI.dispatch(appSyncActions.setAppError(res.messages.length
+            ? {error: res.messages[0]}
+            : {error: 'some error occurred'}))
     }
-    thunkAPI.dispatch((setAppStatus({status: 'failed'})))
-    return thunkAPI.rejectWithValue(err)
+    thunkAPI.dispatch(setAppStatus({status: 'failed'}))
+    return thunkAPI.rejectWithValue({errors: res.messages, fieldsErrors: res.fieldsErrors})
 }
