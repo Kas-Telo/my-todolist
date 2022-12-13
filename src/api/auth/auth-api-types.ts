@@ -1,15 +1,15 @@
-//types
+// types
 export type LoginResponseDataType = {
-    userId: number
+  userId: number
 }
 export type UserResponseDataType = {
-    id: number,
-    login: string,
-    email: string
+  id: number
+  login: string
+  email: string
 }
 export type LoginRequestType = {
-    email: string,
-    password: string,
-    rememberMe: boolean,
-    captcha?: any
+  email: string
+  password: string
+  rememberMe: boolean
+  captcha?: any
 }

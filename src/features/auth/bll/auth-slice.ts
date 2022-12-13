@@ -1,29 +1,29 @@
-import {UserResponseDataType} from "../../../api/auth/auth-api-types";
-import {createSlice, PayloadAction} from "@reduxjs/toolkit";
-import {getMe} from "./auth-thunks";
+import { UserResponseDataType } from '../../../api/auth/auth-api-types'
+import { createSlice, PayloadAction } from '@reduxjs/toolkit'
+import { getMe } from './auth-thunks'
 
 const initialState = {
-    user: {} as UserResponseDataType,
-    isAuth: false,
+  user: {} as UserResponseDataType,
+  isAuth: false,
 }
 
 export const slice = createSlice({
-    name: 'auth',
-    initialState,
-    reducers: {
-        toggleIsAuth: (state, action: PayloadAction<{ isAuth: boolean }>) => {
-            state.isAuth = action.payload.isAuth
-        }
+  name: 'auth',
+  initialState,
+  reducers: {
+    toggleIsAuth: (state, action: PayloadAction<{ isAuth: boolean }>) => {
+      state.isAuth = action.payload.isAuth
     },
-    extraReducers: builder => {
-        builder.addCase(getMe.fulfilled, (state, action) => {
-            state.isAuth = true
-            state.user = action.payload.user
-        })
-    }
+  },
+  extraReducers: (builder) => {
+    builder.addCase(getMe.fulfilled, (state, action) => {
+      state.isAuth = true
+      state.user = action.payload.user
+    })
+  },
 })
 
-export const {toggleIsAuth} = slice.actions
+export const { toggleIsAuth } = slice.actions
 
 
 
