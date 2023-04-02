@@ -54,9 +54,9 @@ export const Login = () => {
       const action = await dispatch(authActions.login(values))
 
       if (authActions.login.rejected.match(action)) {
-        if (action.payload?.fieldsErrors?.length) {
-          const error = action.payload.fieldsErrors[0]
-          formikHelpers.setFieldError('email', error.error)
+        if (action.payload?.errors) {
+          const error = action.payload.errors
+          formikHelpers.setFieldError('email', error[0])
         }
       }
     },

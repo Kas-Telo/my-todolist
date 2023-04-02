@@ -22,6 +22,11 @@ export const AddItemForm = memo(function (props: AddItemFormPropsType) {
   }
 
   const onChangeHandler = (e: ChangeEvent<HTMLInputElement>) => {
+    if (title.length > 100) {
+      setError('Max 100 symbols')
+    } else if (title.length <= 100 && error === 'Max 100 symbols') {
+      setError(null)
+    }
     setTitle(e.currentTarget.value)
   }
 
@@ -30,6 +35,9 @@ export const AddItemForm = memo(function (props: AddItemFormPropsType) {
       setError(null)
     }
     if (e.key === 'Enter') {
+      e.preventDefault()
+    }
+    if (e.key === 'Enter' && !error) {
       addItem()
     }
   }
