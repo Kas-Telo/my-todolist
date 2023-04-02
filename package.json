@@ -1,7 +1,7 @@
 {
   "name": "my-todolist",
   "version": "0.1.0",
-  "homepage": "https://Kas-Telo.github.io/my-todoist",
+  "homepage": "https://Kas-Telo.github.io/my-todolist",
   "private": true,
   "dependencies": {
     "@emotion/react": "^11.10.4",
