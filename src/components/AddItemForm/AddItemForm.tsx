@@ -11,18 +11,33 @@ type AddItemFormPropsType = {
 export const AddItemForm = memo(function (props: AddItemFormPropsType) {
   const [title, setTitle] = useState('')
   const [error, setError] = useState<string | null>(null)
+  const [isTouched, setIsTouched] = useState(false)
 
-  const addItem = () => {
-    if (title.trim() !== '') {
-      props.addItem(title.trim())
-      setTitle('')
-    } else {
+  const onBlurHandler = () => {
+    if (title.trim() === '' && error !== 'Title is required') {
       setError('Title is required')
     }
   }
 
+  const addItem = () => {
+    if (!error) {
+      if (title.trim() !== '') {
+        props.addItem(title.trim())
+        setTitle('')
+        setError(null)
+      } else {
+        setError('Title is required')
+      }
+    }
+  }
+
   const onChangeHandler = (e: ChangeEvent<HTMLInputElement>) => {
-    if (title.length > 100) {
+    if (e.currentTarget.value.trim() === '' && isTouched) {
+      setError('Title is required')
+    }
+    if (e.currentTarget.value.trim() !== '' && error === 'Title is required') {
+      setError(null)
+    } else if (title.length > 100) {
       setError('Max 100 symbols')
     } else if (title.length <= 100 && error === 'Max 100 symbols') {
       setError(null)
@@ -31,9 +46,6 @@ export const AddItemForm = memo(function (props: AddItemFormPropsType) {
   }
 
   const onKeyPressHandler = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (error !== null && title.length <= 100 && e.key !== 'Enter') {
-      setError(null)
-    }
     if (e.key === 'Enter') {
       e.preventDefault()
     }
@@ -54,6 +66,10 @@ export const AddItemForm = memo(function (props: AddItemFormPropsType) {
         helperText={error}
         disabled={props.disabled}
         multiline
+        onBlur={onBlurHandler}
+        onFocus={() => {
+          !isTouched && setIsTouched(true)
+        }}
       />
       <IconButton color='primary' onClick={addItem} disabled={props.disabled}>
         <AddBox />
