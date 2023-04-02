@@ -1,6 +1,7 @@
 {
   "name": "my-todolist",
   "version": "0.1.0",
+  "homepage": "https://Kas-Telo.github.io/my-todoist",
   "private": true,
   "dependencies": {
     "@emotion/react": "^11.10.4",
@@ -20,6 +21,7 @@
     "@types/uuid": "^8.3.4",
     "axios": "^1.1.2",
     "formik": "^2.2.9",
+    "gh-pages": "^5.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-redux": "^8.0.4",
@@ -38,7 +40,9 @@
     "eject": "react-scripts eject",
     "lint": "eslint src/**/*.{js,jsx,ts,tsx,json}",
     "lint:fix": "eslint --fix 'src/**/*.{js,jsx,ts,tsx,json}'",
-    "format": "prettier --write 'src/**/*.{js,jsx,ts,tsx,css,md,json}' --config ./.prettierrc"
+    "format": "prettier --write 'src/**/*.{js,jsx,ts,tsx,css,md,json}' --config ./.prettierrc",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
   },
   "eslintConfig": {
     "extends": [
